@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/bluflow-logo.jpg" width="420"/>
+  <img src="assets/images/bluflo-logo.jpg" width="420"/>
 </p>
 
 <h1 align="center">🛡️ BluAgent SOC Commander (For RUFLO)</h1>
