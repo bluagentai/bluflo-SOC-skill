@@ -1,8 +1,9 @@
+🛡️ BluAgent SOC Commander (RUFLO)
+# 🌊 RuFlo v3.5: Enterprise AI Orchestration Platform
 
+<div align="center">
 
-https://github.com/ruvnet/ruflo/blob/main/ruflo/assets/ruflo-small.jpeg# 🛡️ BluAgent SOC Commander (RUFLO)
-
-> **A full-spectrum, 36-role AI-powered Security Operations Center that turns Claude into a coordinated team of cybersecurity specialists — triaging alerts, coordinating incident response, reversing malware, hunting threats, and generating forensic-grade reporting, all from a single prompt. Engineered with a three-tier token architecture so that even when 8 specialists fire in parallel, your context window stays efficient.**
+![Ruflo Banner](ruflo/assets/ruflo-small.jpeg)> **A full-spectrum, 36-role AI-powered Security Operations Center that turns Claude into a coordinated team of cybersecurity specialists — triaging alerts, coordinating incident response, reversing malware, hunting threats, and generating forensic-grade reporting, all from a single prompt. Engineered with a three-tier token architecture so that even when 8 specialists fire in parallel, your context window stays efficient.**
 
 ---
 
