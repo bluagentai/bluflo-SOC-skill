@@ -2,7 +2,7 @@
   <img src="./Bluflow-Logo.jpg" alt="BluAgent Logo" width="500"/>
 </p>
 
-<h1 align="center">🛡️ BluAgent SOC Commander (RUFLO)</h1>
+<h1 align="center">🛡️ BluAgent SOC Commander (For RUFLO)</h1>
 
 <p align="center">
   <b>AI-Powered 36-Role Security Operations Center</b><br/>
