@@ -1,0 +1,528 @@
+# 🛡️ BluAgent SOC Commander (RUFLO)
+
+> **A full-spectrum, 36-role AI-powered Security Operations Center that turns Claude into a coordinated team of cybersecurity specialists — triaging alerts, coordinating incident response, reversing malware, hunting threats, and generating forensic-grade reporting, all from a single prompt. Engineered with a three-tier token architecture so that even when 8 specialists fire in parallel, your context window stays efficient.**
+
+---
+
+## Why SOC Commander Exists
+
+Modern Security Operations Centers require deep, specialized expertise across a dozen disciplines simultaneously. Tier 1 triage. Memory forensics. Malware reverse engineering. Threat intelligence correlation. Detection engineering. OSINT investigation. Most AI security tools give you a single generalist response. That's not how real SOCs work.
+
+**SOC Commander is different.** It activates a structured orchestration layer — a Master Orchestrator backed by 36 specialist roles — that mirrors how an enterprise SOC actually operates. You get routed, structured, expert-level responses from the right specialist for the right task, with escalation chains, multi-role parallel workflows, and output formatted for actual incident operations.
+
+Built for mid-market security teams, MSSPs, vCISOs, GRC practitioners, and security researchers who need elite SOC-grade AI output without enterprise headcount.
+
+---
+
+## What's RUFLO?
+
+**RUFLO** is the internal project name and zip distribution format for this skill set: `BluAgent-SOC-Ruflo.zip`. It represents the full packaged release of the SOC Commander skill tree — the Master Orchestrator plus all 36 specialist roles across 16 discipline folders, structured for installation into Claude's skill system.
+
+When you see references to RUFLO in issues, PRs, or internal BluAgent tooling, it refers to this complete skill bundle.
+
+---
+
+## What It Does
+
+SOC Commander activates when you present:
+
+- Raw security alerts, SIEM events, or firewall/EDR logs
+- Active incidents ("We're seeing lateral movement on a DC")
+- Artifacts for analysis (malware samples, PCAPs, memory dumps, IOCs, email headers)
+- Threat hunting requests
+- Detection engineering tasks (new Sigma/KQL/SPL/YARA rules)
+- Compliance and GRC security questions with framework mapping
+- Vulnerability assessment and prioritization
+- Post-incident documentation and forensic reporting
+
+The **SOC Commander (Master Orchestrator)** receives your input, classifies it, assesses severity, and routes it to the correct specialist — or coordinates multiple specialists in parallel for complex incidents.
+
+---
+
+## The Three-Tier Token Architecture
+
+> **This is one of SOC Commander's most important engineering decisions.** With 36 role files across 16 folders, naively loading all specialists into context simultaneously would saturate the context window before you've typed a single alert.
+
+SOC Commander uses a **three-tier lazy-loading model** that keeps token utilization lean regardless of how many roles are invoked.
+
+### Tier 1 — Always in Context: Skill Descriptor (~100 words per skill)
+
+Only the `name` and `description` fields from each skill's YAML frontmatter are loaded at all times. These are short (~100 words per role) and collectively establish the full roster without loading any deep content.
+
+```yaml
+---
+name: bluagent-soc-commander
+description: >
+  Full-spectrum SOC orchestration skill for BluAgent. Activates a 36-role
+  Security Operations Center with a Master Orchestrator...
+---
+```
+
+### Tier 2 — Loaded on Trigger: Role SKILL.md (~50 lines)
+
+When a specialist is invoked, only their `SKILL.md` loads — a **lean role file** containing identity, core responsibilities, and pointers to reference sub-files. These are intentionally kept to ~50 lines. No deep content lives here.
+
+```
+10-red-team/
+├── red-team-lead.md       ← identity + responsibilities + pointers (~50 lines)
+└── references/
+    ├── engagement-planning.md
+    ├── roe-template.md
+    └── report-template.md
+```
+
+### Tier 3 — Loaded on Demand: Reference Sub-Files
+
+Deep content — framework mappings, output templates, decision trees, evidence checklists, playbook steps — lives in `references/` sub-folders. These only load when explicitly needed by the specialist during task execution.
+
+### Why This Matters at Scale
+
+In a ransomware scenario where 8 specialists fire simultaneously:
+
+| Approach | Token Load |
+|---|---|
+| Naïve — all content in each SKILL.md | 8 × ~300 lines = **2,400 lines** in context |
+| Three-tier architecture | 8 × ~50 lines = **400 lines** + only needed references |
+
+**The three-tier model reduces parallel-specialist token load by ~80% in complex multi-role scenarios.** This is what makes a 36-role SOC viable in a single context window.
+
+### Design Rule Enforced Across All 36 Roles
+
+No deep content (templates, decision trees, framework mappings, evidence checklists) lives directly in a role's `SKILL.md`. All heavy content is in `references/` sub-files and loads only when invoked by the specialist. This rule must be maintained for any new roles or contributions added to RUFLO.
+
+---
+
+## Full Skill Tree (36 Roles, 16 Folders)
+
+```
+BluAgent-SOC-Ruflo/
+├── 00-orchestrator/
+│   └── SKILL.md                         ← SOC Commander (Master Orchestrator)
+├── 01-soc-leadership/
+│   ├── ciso.md
+│   ├── director-secops.md
+│   ├── soc-manager.md
+│   └── shift-lead.md
+├── 02-soc-analysis/
+│   ├── tier1-analyst.md
+│   ├── tier2-analyst.md
+│   └── tier3-analyst.md
+├── 03-incident-response/
+│   ├── ir-lead.md
+│   ├── ir-handler.md
+│   └── director-ir.md
+├── 04-dfir/
+│   ├── forensic-examiner.md
+│   ├── memory-forensics.md
+│   ├── network-forensics.md
+│   ├── mobile-forensics.md
+│   ├── ediscovery.md
+│   └── dfir-lead.md
+├── 05-threat-intelligence/
+│   ├── cti-analyst.md
+│   ├── osint-analyst.md
+│   ├── dark-web-analyst.md
+│   └── director-ti.md
+├── 06-siem-detection/
+│   ├── detection-engineer.md
+│   ├── siem-engineer.md
+│   └── soar-engineer.md
+├── 07-threat-hunting/
+│   └── threat-hunter.md
+├── 08-malware-analysis/
+│   └── malware-analyst.md
+├── 09-vulnerability-management/
+│   ├── vulnerability-analyst.md
+│   └── vm-lead.md
+├── 10-red-team/
+│   ├── red-team-lead.md
+│   ├── penetration-tester.md
+│   └── references/
+│       ├── engagement-planning.md
+│       ├── roe-template.md
+│       └── arcanum-ai-testing.md
+├── 11-purple-team/
+│   ├── purple-team-lead.md
+│   └── references/
+│       ├── mitre-coverage-mapping.md
+│       └── detection-validation.md
+├── 12-security-engineering/
+│   ├── security-architect.md
+│   └── security-engineer.md
+├── 13-cloud-security/
+│   └── cloud-soc-analyst.md
+├── 14-compliance-grc/
+│   ├── compliance-analyst.md
+│   └── references/
+│       ├── framework-mappings.md
+│       ├── evidence-templates.md
+│       └── breach-notification.md
+└── 15-security-awareness/
+    └── awareness-specialist.md
+```
+
+---
+
+## The Specialist Roster
+
+### 🔵 SOC Leadership (`01-soc-leadership/`)
+
+| Role | Capability |
+|------|------------|
+| **CISO** | Executive security strategy, board communication, regulatory posture |
+| **Director of SecOps** | SOC program oversight, team performance, metrics |
+| **SOC Manager** | Day-to-day SOC operations, shift management, analyst coaching |
+| **Shift Lead** | Real-time incident triage oversight, escalation decisions |
+
+### 🟡 SOC Analysis (`02-soc-analysis/`)
+
+| ID | Role | Capability |
+|----|------|------------|
+| **T1** | Tier 1 Analyst — Triage | Initial alert triage, observable extraction, priority classification |
+| **T2** | Tier 2 Analyst — Incident Responder | Validated incident investigation, timeline construction, containment analysis |
+| **T3** | Tier 3 Analyst — Advanced Threat | APT investigation, advanced TTP analysis, sophisticated attack chain reconstruction |
+
+### 🔴 Incident Response (`03-incident-response/`)
+
+| ID | Role | Capability |
+|----|------|------------|
+| **IR-L** | IR Lead / Incident Commander | Full incident command, stakeholder coordination, breach scope management |
+| **IR-H** | IR Handler / Analyst | Containment execution, eradication steps, recovery actions |
+| **DIR-IR** | Director of Incident Response | Program-level IR governance, major breach command authority |
+
+### 🔬 Digital Forensics & IR (`04-dfir/`)
+
+| ID | Role | Capability |
+|----|------|------------|
+| **DF** | DFIR Forensic Examiner | Disk and filesystem forensics, evidence preservation, chain of custody |
+| **MF** | Memory Forensics Specialist | RAM analysis, process injection detection, in-memory artifact recovery |
+| **NF** | Network Forensics Analyst | PCAP analysis, C2 identification, lateral movement path reconstruction |
+| **MOB** | Mobile Forensics Specialist | iOS/Android acquisition, app data extraction, mobile artifact analysis |
+| **ED** | eDiscovery Analyst | Legal hold coordination, data preservation, ESI collection |
+| **DFIR-L** | DFIR Lead | Complex investigation command, team coordination, expert witness support |
+
+### 🌐 Threat Intelligence & OSINT (`05-threat-intelligence/`)
+
+| ID | Role | Capability |
+|----|------|------------|
+| **CTI** | Cyber Threat Intelligence Analyst | IOC enrichment, threat actor profiling, TTP mapping to MITRE ATT&CK |
+| **OSI** | OSINT Analyst | External exposure discovery, leaked credential identification, infrastructure recon |
+| **DW** | Dark Web Analyst | Darknet marketplace monitoring, threat actor forum tracking, credential leak detection |
+| **DIR-TI** | Director of Threat Intelligence | Intelligence program strategy, fusion center coordination |
+
+### ⚙️ Detection Engineering & SIEM (`06-siem-detection/`)
+
+| ID | Role | Capability |
+|----|------|------------|
+| **DE** | Detection Engineer | Sigma, KQL, SPL, and YARA rule creation, detection gap analysis |
+| **SE** | SIEM Engineer | Data source onboarding, parsing, normalization, SIEM health troubleshooting |
+| **SO** | SOAR Engineer | Playbook design, automation logic, integration architecture |
+
+### 🕵️ Proactive Security
+
+| ID | Role | Folder | Capability |
+|----|------|--------|------------|
+| **TH** | Threat Hunter | `07-threat-hunting/` | Hypothesis-driven hunting, anomaly identification, hunt-to-detection pipeline |
+| **MA** | Malware Analyst / Reverse Engineer | `08-malware-analysis/` | Static/dynamic analysis, deobfuscation, capability mapping, IOC extraction |
+| **VA** | Vulnerability Analyst | `09-vulnerability-management/` | CVE analysis, risk prioritization, remediation guidance |
+| **VML** | Vulnerability Management Lead | `09-vulnerability-management/` | Program governance, SLA tracking, patch metrics |
+
+### 🔴 Offensive Security
+
+| ID | Role | Folder | Capability |
+|----|------|--------|------------|
+| **RT** | Red Team Lead | `10-red-team/` | Adversarial perspective, attack path simulation, Rules of Engagement |
+| **PEN** | Penetration Tester | `10-red-team/` | Exploitation assessment, attack surface analysis, report generation |
+| **PT** | Purple Team Lead | `11-purple-team/` | Detection validation, adversary emulation, MITRE ATT&CK coverage mapping |
+
+### ☁️ Specialized Domains
+
+| ID | Role | Folder | Capability |
+|----|------|--------|------------|
+| **SA** | Security Architect | `12-security-engineering/` | Enterprise security design, zero trust architecture, threat modeling |
+| **SENG** | Security Engineer | `12-security-engineering/` | Control implementation, security tooling, hardening |
+| **CSA** | Cloud SOC Analyst | `13-cloud-security/` | AWS/Azure/GCP incident investigation, IAM anomaly detection |
+| **CA** | Compliance Analyst | `14-compliance-grc/` | NIST CSF 2.0, ISO 27001, SOC 2, NIST AI RMF, ISO 42001, CMMC 2.0 mapping |
+| **AW** | Security Awareness Specialist | `15-security-awareness/` | Training program design, phishing simulation, human risk metrics |
+
+---
+
+## Orchestration Engine
+
+### Intake Protocol
+
+Every task processed by SOC Commander goes through a **three-step structured intake** before any specialist is invoked:
+
+#### Step 1 — Input Classification
+
+| Input Type | Examples |
+|---|---|
+| Raw logs / alerts | SIEM alerts, firewall logs, EDR detections, email headers, syslog output |
+| Active incident | "We're seeing ransomware on three servers" / "Lateral movement detected" |
+| Proactive request | "Hunt for persistence mechanisms" / "Audit our detection coverage" |
+| Artifact | Malware binary, PCAP file, memory dump, disk image, IOC list |
+| Documentation | IR report draft, forensic report, threat brief, playbook creation |
+| Strategic | SOC maturity assessment, tool evaluation, process improvement |
+
+#### Step 2 — Severity Assessment
+
+| Severity | Criteria | Response Mode |
+|---|---|---|
+| 🔴 **CRITICAL** | Active breach, ransomware detonation, confirmed data exfiltration, APT confirmed | Immediate — IR Lead + all relevant specialists in parallel |
+| 🟠 **HIGH** | Confirmed malicious activity, compromised credentials, active C2 communication | Fast — Tier 2/3 + domain specialist |
+| 🟡 **MEDIUM** | Suspicious but unconfirmed — anomalous behavior, policy violations, unusual auth | Standard — Tier 1 triage → escalate as evidence warrants |
+| 🟢 **LOW** | Informational, compliance check, proactive improvement, tuning request | Queue — route to appropriate specialist |
+
+#### Step 3 — Specialist Routing via Delegation Matrix
+
+| Domain | Trigger | Primary Role | Escalation |
+|---|---|---|---|
+| Alert Triage | New SIEM alert, initial assessment | **Tier 1 Analyst** | → Tier 2 if confirmed malicious |
+| Investigation | Validated incident, deeper analysis | **Tier 2 Analyst** | → Tier 3 if APT/complex |
+| Advanced Threats | APT-level TTPs, sophisticated attack chains | **Tier 3 Analyst** | → IR Lead if major breach |
+| Incident Command | Major incident coordination | **IR Lead** | Assembles full IR team |
+| Disk/File Forensics | Drive imaging, filesystem analysis | **DFIR Examiner** | → DFIR Lead for complex |
+| Memory Analysis | RAM capture, in-memory artifacts | **Memory Forensics** | — |
+| Network Forensics | PCAP analysis, C2 tracing | **Network Forensics** | — |
+| Mobile Forensics | iOS/Android artifact acquisition | **Mobile Forensics** | — |
+| Malware | Sample analysis, reverse engineering | **Malware Analyst** | — |
+| IOC Enrichment | Threat actor research, TTP attribution | **CTI Analyst** | — |
+| External Exposure | Leaked creds, attack surface recon | **OSINT Analyst** | — |
+| Darknet Monitoring | Threat actor forums, credential markets | **Dark Web Analyst** | — |
+| New Detection Rules | Sigma/KQL/SPL/YARA authoring | **Detection Engineer** | — |
+| SIEM Health | Parsing issues, data source gaps | **SIEM Engineer** | — |
+| Automation | Playbook design, SOAR workflows | **SOAR Engineer** | — |
+| Threat Hunt | Hypothesis-driven hunt execution | **Threat Hunter** | → Tier 3 if threat found |
+| Vulnerabilities | CVE triage, risk prioritization | **Vulnerability Analyst** | — |
+| Cloud Investigation | AWS/Azure/GCP incident, IAM anomaly | **Cloud SOC Analyst** | — |
+| Detection Validation | Adversary emulation, ATT&CK coverage | **Purple Team Lead** | — |
+| Compliance / GRC | Framework mapping, evidence packaging | **Compliance Analyst** | — |
+
+---
+
+## Escalation Chain
+
+```
+Tier 1 Analyst
+  │
+  ↓ confirmed malicious / complex scope
+Tier 2 Analyst
+  │
+  ↓ APT-level TTPs / advanced attack chain
+Tier 3 Analyst
+  │
+  ↓ major breach / executive impact / regulatory triggers
+IR Lead / Incident Commander
+  │
+  ↓ business continuity / legal / breach notification required
+SOC Manager
+  │
+  ↓ board-level impact / public disclosure / law enforcement
+Director of IR → CISO
+```
+
+---
+
+## Pre-Built Multi-Role Workflows
+
+For high-complexity scenarios, SOC Commander deploys coordinated specialist task forces. Specialists are invoked in parallel where the workflow allows, minimizing total response time.
+
+### 🔴 Ransomware Incident Response
+
+Simultaneous engagement of:
+1. **IR Lead** — assumes command, coordinates all response actions
+2. **Tier 3 Analyst** — scopes compromise, identifies patient zero
+3. **DFIR Examiner** — images affected systems, establishes evidence chain of custody
+4. **Memory Forensics** — captures RAM on live systems before isolation
+5. **Malware Analyst** — reverses the ransomware payload, maps capabilities
+6. **Network Forensics** — identifies C2 channels and lateral movement paths
+7. **CTI Analyst** — attributes threat actor, checks for known decryptors
+8. **Detection Engineer** — deploys new detections to block re-entry attempts
+
+### 🎣 Phishing Campaign Investigation
+
+1. **Tier 1 Analyst** — triages alert, extracts observables from email headers
+2. **OSINT Analyst** — investigates sender infrastructure and domain registration history
+3. **CTI Analyst** — correlates IOCs against threat feeds, attributes the campaign
+4. **Tier 2 Analyst** — determines whether any users clicked or executed payloads
+5. **Malware Analyst** — analyzes attachment payload if present
+6. **Detection Engineer** — builds detection rules to catch future campaign variants
+
+### 🔍 Proactive Threat Hunt
+
+1. **Threat Hunter** — develops hypothesis, executes hunt queries across environment
+2. **CTI Analyst** — provides current intelligence on TTPs to hunt for
+3. **Detection Engineer** — converts confirmed hunt findings into persistent detection logic
+4. **Purple Team Lead** — validates new detections against simulated adversary behavior
+
+### 🌑 Dark Web Exposure Investigation
+
+1. **Dark Web Analyst** — monitors darknet forums and credential markets for organization references
+2. **OSINT Analyst** — correlates external attack surface with exposed data
+3. **CTI Analyst** — assesses threat actor intent and targeting likelihood
+4. **Tier 2 Analyst** — determines internal exposure scope if credentials are confirmed leaked
+5. **Compliance Analyst** — evaluates breach notification obligations
+
+### ☁️ Cloud Breach Response
+
+1. **Cloud SOC Analyst** — investigates CloudTrail/Audit Logs, identifies compromised IAM principals
+2. **Tier 3 Analyst** — correlates cloud activity with on-prem indicators
+3. **DFIR Examiner** — preserves cloud-native forensic artifacts before auto-remediation deletes them
+4. **CTI Analyst** — identifies attack pattern, assesses if targeted or opportunistic
+5. **Compliance Analyst** — maps incident to regulatory obligations (SOC 2, CMMC, GDPR)
+
+---
+
+## Output Format
+
+Every SOC Commander response is structured for operational use:
+
+1. **Situation Summary** — what was found, confirmed severity, estimated scope
+2. **Actions Taken** — which specialists were invoked and what each contributed
+3. **Findings** — technical details organized by specialist discipline
+4. **Recommendations** — next steps, prioritized by urgency and risk
+5. **Escalation Status** — whether this requires executive, legal, or regulatory involvement
+
+---
+
+## Invocation Patterns
+
+SOC Commander responds to natural language. No special syntax required.
+
+```
+# General routing — Commander assesses and delegates automatically
+"Analyze this Splunk alert for me."
+"Here's a suspicious PCAP from our perimeter firewall."
+"We think we have an active intrusion. Where do I start?"
+
+# Direct role invocation — bypass Commander, go straight to specialist
+"As the Malware Analyst, reverse this base64-encoded payload."
+"I need the Detection Engineer to write a Sigma rule for this TTP."
+"OSINT Analyst — what can you find on this domain: evil-corp[.]io"
+"Dark Web Analyst — check for leaked credentials from our domain."
+"As the Compliance Analyst, map this incident to CMMC 2.0."
+
+# Workflow invocation — multi-role coordinated response
+"Run the ransomware IR workflow."
+"Kick off a phishing investigation for this email header."
+"Start a threat hunt for persistence via scheduled tasks."
+"Run a cloud breach response for a suspected IAM compromise."
+"Dark web exposure investigation — domain: example.com"
+
+# Status and command awareness
+"SOC status"        → Commander reports on active investigations and open threads
+"Escalate to IR Lead" → Commander transfers command authority
+```
+
+---
+
+## Token Efficiency at Scale
+
+Because this is a 36-role skill set, token management is a first-class design concern. Here's how the architecture behaves under realistic load:
+
+| Scenario | Roles Invoked | Tier 1 (Fixed) | Tier 2 Load | Tier 3 Load |
+|---|---|---|---|---|
+| Simple alert triage | 1 (T1 Analyst) | ~100 words × 36 skills | ~50 lines × 1 | 0 reference files |
+| Phishing investigation | 5 roles | ~100 words × 36 skills | ~50 lines × 5 | Only needed references |
+| Ransomware IR | 8 roles | ~100 words × 36 skills | ~50 lines × 8 | Only needed references |
+| Full SOC engagement | All 36 roles | ~100 words × 36 skills | ~50 lines × 36 | Only needed references |
+
+Tier 1 (the skill descriptors) is a fixed, small overhead shared across all invocations. Tier 2 and Tier 3 scale only with actual work needed — never with the total number of available roles.
+
+The three-tier model reduces parallel-specialist token load by approximately 80% compared to storing all content directly in each role's SKILL.md. This is the architectural decision that makes a 36-role SOC viable within a single context window.
+
+---
+
+## Framework Coverage
+
+The **Compliance Analyst** specialist (`14-compliance-grc/`) carries full mapping support for:
+
+| Framework | Coverage |
+|---|---|
+| **NIST CSF 2.0** | Govern, Identify, Protect, Detect, Respond, Recover — with control evidence requirements |
+| **ISO 27001:2022** | All Annex A controls with evidence collection methodology |
+| **SOC 2 TSC** | Security, Availability, Confidentiality, Processing Integrity, Privacy |
+| **NIST AI RMF** | Map, Measure, Manage, Govern — with agentic AI decision audit trail requirements |
+| **ISO 42001** | AI management system controls, auditor-ready evidence packaging |
+| **CMMC 2.0** | Level 1, 2, and 3 practices with assessment evidence guidance |
+
+AI governance frameworks (NIST AI RMF and ISO 42001) are flagged explicitly for agentic SOC contexts — every AI-assisted decision in a SOC Commander session is logged with audit trail requirements appropriate for framework compliance reviews.
+
+---
+
+## Integration with BluAgent Platform
+
+SOC Commander is the AI backbone of the [BluAgent](https://bluagent.io) AI Governance and SOC Automation platform. It is designed to operate alongside:
+
+- **Agentic Decision Audit Trails** — every specialist action logged with SHA-256 tamper-evident hashing
+- **Human-in-the-Loop Approval Gates** — critical containment or eradication actions require human confirmation before execution
+- **Framework Compliance Mapping** — findings automatically mapped to ISO 42001, NIST AI RMF, OWASP Agentic AI Top 10, MAESTRO, and MITRE ATT&CK
+- **Incident-to-Evidence Pipeline** — IR actions produce auditor-ready evidence packages in real time
+- **SIEM Ingestion** — Splunk, Elastic, REST API, and syslog normalization layer feeds alerts directly to Commander intake
+
+---
+
+## Requirements
+
+- **Claude** (Sonnet or Opus recommended for complex multi-role workflows)
+- Compatible with any Claude interface that supports custom skills: Claude Desktop, Claude Code, or any MCP-enabled integration
+- Install by dropping `BluAgent-SOC-Ruflo.zip` into a skill-enabled Claude session
+- No external API keys required for base functionality
+- Optionally integrates with BluAgent backend for audit trail and compliance mapping features
+
+---
+
+## Installation
+
+```bash
+# Option 1 — Drag and drop (recommended)
+# Drop BluAgent-SOC-Ruflo.zip directly into your Claude Desktop or Claude Code session.
+# The skill system will unpack the folder tree and register all 36 roles automatically.
+
+# Option 2 — Manual install
+unzip BluAgent-SOC-Ruflo.zip -d ~/.claude/skills/
+# Then restart Claude Desktop or reload your MCP skill configuration.
+```
+
+---
+
+## Contributing
+
+RUFLO is designed to grow. When adding or expanding a role, follow the three-tier architecture rule:
+
+1. **Lean SKILL.md first** — identity, responsibilities, and pointers only (~50 lines max)
+2. **References subfolder for depth** — templates, decision trees, checklists go in `references/`
+3. **Update the Delegation Matrix** in `00-orchestrator/SKILL.md` to route to the new role
+4. **Test multi-role scenarios** — verify the new role doesn't balloon token load when invoked in parallel
+
+---
+
+## Who This Is For
+
+| Persona | Use Case |
+|---|---|
+| **Mid-Market Security Teams** | Punch above your headcount — deploy expert-level specialist workflows without 20 FTE |
+| **MSSPs / vCISOs** | Rapid, structured, client-facing incident analysis with formal output |
+| **GRC / Compliance Practitioners** | Security incident analysis tied to framework controls and evidence requirements |
+| **Security Researchers** | Deep-dive artifact analysis with specialist-grade output |
+| **Detection Engineers** | Hunt-to-detection pipeline with built-in review and validation |
+| **SOC Managers** | Training material, playbook drafting, and escalation simulation |
+
+---
+
+## About BluAgent
+
+**BluAgent** is an AI governance and SOC automation platform built for mid-market cybersecurity teams. It combines real-time agentic runtime observability, immutable decision audit trails, and ISO 42001 / NIST AI RMF auditor-ready evidence packaging — purpose-built for organizations that need enterprise-grade AI security assurance without enterprise complexity.
+
+- Website: [bluagent.io](https://bluagent.ai)
+- Built by practitioners, for practitioners.
+
+---
+
+## License
+
+MIT License — see `LICENSE` for details.
+
+---
+
+*SOC Commander (RUFLO) is part of the BluAgent open skill library. Contributions, issue reports, and role expansion PRs welcome.*
